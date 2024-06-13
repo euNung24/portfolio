@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useEffect, useState } from 'react';
 import { Text } from '@react-three/drei';
+import { useRouter } from 'next/navigation';
 
 type MenuItemProps = {
   title: string;
@@ -9,6 +10,7 @@ type MenuItemProps = {
 
 export const MenuItemContext = createContext({ isHover: false });
 const MenuItem = ({ title, position, children }: MenuItemProps) => {
+  const router = useRouter();
   const [isHover, setHover] = useState(false);
 
   const onPointerEnter = () => {
@@ -17,6 +19,12 @@ const MenuItem = ({ title, position, children }: MenuItemProps) => {
 
   const onPointerOut = () => {
     setHover(false);
+  };
+
+  const movePage = () => {
+    const [first, ...others] = title.split(' ');
+    const pathname = first.toLowerCase() + others.join('');
+    router.push(pathname);
   };
 
   useEffect(() => {
@@ -30,7 +38,11 @@ const MenuItem = ({ title, position, children }: MenuItemProps) => {
 
   return (
     <MenuItemContext.Provider value={{ isHover }}>
-      <group onPointerEnter={onPointerEnter} onPointerOut={onPointerOut}>
+      <group
+        onPointerEnter={onPointerEnter}
+        onPointerOut={onPointerOut}
+        onClick={movePage}
+      >
         {children}
         <Text
           color={isHover ? '#444b6e' : '#000000'}
