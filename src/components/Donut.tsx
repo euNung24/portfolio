@@ -1,36 +1,43 @@
-import { ReactNode, useEffect, useRef } from 'react';
+import { ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Text, useGLTF } from '@react-three/drei';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { MenuItemContext } from '@/components/MenuItem';
 
 type DonutProps = {
   url: string;
   scale?: number;
   position?: [number, number, number];
   rotation?: [number, number, number];
-  children?: ReactNode;
 };
-const Donut = ({ url, position, children, rotation, scale = 1 }: DonutProps) => {
-  const donutRef = useRef<THREE.Group | null>(null);
+const Donut = ({ url, position, rotation, scale = 1 }: DonutProps) => {
   const { scene } = useGLTF(url);
+  const donutRef = useRef<THREE.Group | null>(null);
+  const { isHover } = useContext(MenuItemContext);
 
   useFrame(() => {
-    if (donutRef.current) {
+    if (donutRef.current && isHover) {
       donutRef.current.rotation.y -= 0.05;
     }
   });
 
+  useEffect(() => {
+    const bodyClassList = document.body.classList;
+    isHover ? bodyClassList.add('pointer') : bodyClassList.remove('pointer');
+
+    return () => {
+      bodyClassList.remove('pointer');
+    };
+  }, [isHover]);
+
   return (
-    <group>
-      <primitive
-        ref={donutRef}
-        object={scene}
-        scale={scale}
-        position={position}
-        rotation={rotation}
-      />
-      {children}
-    </group>
+    <primitive
+      ref={donutRef}
+      object={scene}
+      scale={scale}
+      position={position}
+      rotation={rotation}
+    />
   );
 };
 
